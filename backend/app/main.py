@@ -20,6 +20,7 @@ from .conflicts import (
 )
 from .cooccurrence import build_code_intervals, intersect_intervals
 from .db import get_db, init_db, list_codings, next_color
+from .speakers import build_speaker_analysis
 
 Resolution = Literal["keep", "merge", "split"]
 
@@ -550,3 +551,23 @@ def cooccurrence(
         "codes": [all_codes[cid] for cid in member_ids],
         "pairs": pairs,
     }
+
+
+# ---------- 说话人分析 ----------
+
+@app.get("/api/documents/{document_id}/speakers")
+def speaker_analysis(document_id: int) -> dict:
+    """按文档返回说话人分析。
+
+    按行首 "说话人：内容" 解析发言段落，统计每位说话人的文本长度、各编码
+    覆盖字符数与覆盖率；同一编码的重叠标注先合并再裁剪到发言段落，共享
+    字符不重复计数；首个标签之前的文本归入 "未标注说话人"（name 为 null）。
+    """
+    with get_db() as conn:
+        doc = get_document_or_404(conn, document_id)
+        codes = [
+            dict(r)
+            for r in conn.execute("SELECT id, name, color FROM codes ORDER BY id")
+        ]
+        codings = list_codings(conn, document_id)
+    return build_speaker_analysis(document_id, doc["content"], codings, codes)

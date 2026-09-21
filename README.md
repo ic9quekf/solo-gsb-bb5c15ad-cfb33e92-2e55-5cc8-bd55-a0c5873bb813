@@ -42,6 +42,12 @@ docker compose up --build
   - 点击非零单元格列出对应**交集片段及原文摘录**，点击片段自动切回正文、滚动并闪烁定位高亮；
   - 编码筛选变化后矩阵与片段明细同步更新；无共现或未勾选编码时给出明确空状态。
   - 对应 `GET /api/documents/{id}/cooccurrence?codes=…`。
+- **说话人分析视图**：正文区顶部切换到「说话人分析」标签，按行首 `说话人：内容`（全角 / 半角冒号均可）识别发言段落——
+  - 发言段落从标签行起延伸到下一个发言段落起点（或文末）；说话人的**文本长度**按去掉标签与首尾空白后的发言内容字符数累计；首个标签之前无法识别说话人的文本归入**未标注说话人**；
+  - 统计口径与共现一致：同一编码的重叠 / 相邻标注**先合并，再裁剪到发言段落**，共享字符不重复计数；覆盖率 = 覆盖字符数 ÷ 文本长度；
+  - 矩阵每行一位说话人，列为发言段数、文本长度与各编码的覆盖字符数 + 覆盖率（按覆盖率深浅着色）；顶部**说话人筛选**复选框控制行的显示；
+  - 点击非零单元格列出该说话人在该编码下的覆盖片段，点击「文本长度」列出其全部发言段落，点击任一条目自动切回正文、滚动并闪烁定位；
+  - 对应 `GET /api/documents/{id}/speakers`。
 - **JSON 导出**：顶栏「导出 JSON」下载当前文档的完整编码结果（含每条标注的区间与原文切片），对应 `GET /api/documents/{id}/export`。
 - **持久化**：所有文档、编码本、标注均存于 SQLite，刷新页面后原样恢复；首次启动自动载入一份示例访谈与编码。
 
@@ -68,6 +74,7 @@ npm run dev   # http://localhost:5173
 | GET | `/api/documents/{id}` | 文档详情（含编码本与全部标注） |
 | GET | `/api/documents/{id}/search?query=…` | 字面关键词检索：返回全部命中的半开区间与前后文（含彼此重叠的命中） |
 | GET | `/api/documents/{id}/cooccurrence` | 编码两两共现统计，可带 `?codes=1&codes=2` 按编码筛选；返回每对编码合并后的共现字符数、片段数与原文摘录 |
+| GET | `/api/documents/{id}/speakers` | 说话人分析：解析 `说话人：内容` 发言段落，返回每位说话人（含未标注说话人）的文本长度、各编码覆盖字符数与覆盖率（同一编码先合并再裁剪到发言段落），附发言段落与覆盖片段区间 |
 | GET | `/api/documents/{id}/export` | 导出 JSON（附件下载） |
 | GET / POST | `/api/codes` | 编码本列表 / 新建（重名返回 409） |
 | PUT / DELETE | `/api/codes/{id}` | 重命名、改色 / 删除（级联删除标注） |
@@ -87,11 +94,12 @@ npm run dev   # http://localhost:5173
 │       ├── main.py           # FastAPI 路由与决策应用
 │       ├── conflicts.py      # 冲突检测 / 合并 / 拆分纯函数
 │       ├── cooccurrence.py   # 区间归一化 / 交集 / 共现统计纯函数
+│       ├── speakers.py       # 说话人发言段落解析 / 覆盖统计纯函数
 │       └── db.py             # SQLite 连接、建表、示例数据
 └── frontend/
     ├── Dockerfile          # 多阶段构建：Vite build → nginx
     ├── nginx.conf          # 静态托管 + /api 反向代理
     └── src/
         ├── App.jsx         # 状态编排与冲突决策流
-        └── components/     # TextView / CodingForm / SearchBatchPanel / ConflictDialog / Sidebar / CooccurrenceView
+        └── components/     # TextView / CodingForm / SearchBatchPanel / ConflictDialog / Sidebar / CooccurrenceView / SpeakerView
 ```

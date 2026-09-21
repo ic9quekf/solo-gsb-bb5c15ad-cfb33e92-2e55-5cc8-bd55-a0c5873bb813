@@ -465,6 +465,112 @@ textarea:focus {
   white-space: nowrap;
 }
 
+/* ---------- 说话人分析视图 ---------- */
+
+.speaker-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.speaker-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.speaker-filter {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-size: 13px;
+}
+
+.speaker-filter-label {
+  color: var(--muted);
+  flex: none;
+}
+
+.speaker-filter label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.speaker-filter label.dimmed .speaker-name,
+.speaker-filter label.dimmed .speaker-filter-stat {
+  opacity: 0.45;
+}
+
+.speaker-name.none,
+.speaker-matrix .th-name.none {
+  color: var(--muted);
+  font-style: italic;
+}
+
+.speaker-filter-stat {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.speaker-matrix .speaker-meta-col {
+  min-width: 64px;
+  max-width: 80px;
+  text-align: center;
+}
+
+.speaker-num {
+  text-align: center;
+  font-size: 13px;
+  padding: 0 8px;
+}
+
+.speaker-stat-btn {
+  border: none;
+  background: none;
+  padding: 4px 10px;
+  font-size: 13px;
+  color: var(--accent);
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.speaker-stat-btn:hover {
+  background: #eff6ff;
+}
+
+.speaker-stat-btn.selected {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+  font-weight: 600;
+}
+
+.speaker-cell {
+  width: 78px;
+  height: 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  line-height: 1.2;
+}
+
+.speaker-cell-n {
+  font-weight: 600;
+}
+
+.speaker-cell-pct {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.speaker-cell.clickable .speaker-cell-pct {
+  color: var(--accent-dark);
+}
+
 /* ---------- 右栏 ---------- */
 
 .right-panel {

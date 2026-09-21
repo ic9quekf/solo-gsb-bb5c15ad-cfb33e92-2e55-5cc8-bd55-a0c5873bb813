@@ -5,6 +5,7 @@ import CodingForm from './components/CodingForm'
 import ConflictDialog from './components/ConflictDialog'
 import Sidebar from './components/Sidebar'
 import CooccurrenceView from './components/CooccurrenceView'
+import SpeakerView from './components/SpeakerView'
 import SearchBatchPanel from './components/SearchBatchPanel'
 
 export default function App() {
@@ -20,10 +21,13 @@ export default function App() {
   const [error, setError] = useState(null)
   const [showNewDoc, setShowNewDoc] = useState(false)
   const [newDoc, setNewDoc] = useState({ title: '', content: '' })
-  const [view, setView] = useState('text') // text | cooccurrence
+  const [view, setView] = useState('text') // text | cooccurrence | speakers
   const [coocStats, setCoocStats] = useState(null)
   const [coocLoading, setCoocLoading] = useState(false)
   const [coocError, setCoocError] = useState(null)
+  const [speakerStats, setSpeakerStats] = useState(null)
+  const [speakerLoading, setSpeakerLoading] = useState(false)
+  const [speakerError, setSpeakerError] = useState(null)
   const [pendingLocate, setPendingLocate] = useState(null)
 
   const showError = useCallback((e) => {
@@ -108,6 +112,27 @@ export default function App() {
   useEffect(() => {
     loadCooccurrence()
   }, [loadCooccurrence])
+
+  // ---------- 说话人分析（随当前文档与标注变化同步） ----------
+
+  const loadSpeakers = useCallback(async () => {
+    if (docId == null) return
+    setSpeakerLoading(true)
+    setSpeakerError(null)
+    try {
+      setSpeakerStats(await api.getSpeakers(docId))
+    } catch (e) {
+      setSpeakerStats(null)
+      setSpeakerError(e.message || String(e))
+    } finally {
+      setSpeakerLoading(false)
+    }
+    // docData 变化（新建/编辑/删除标注后 refresh）也要重新统计
+  }, [docId, docData])
+
+  useEffect(() => {
+    loadSpeakers()
+  }, [loadSpeakers])
 
   // ---------- 编码创建 / 编辑（含冲突检测） ----------
 
@@ -221,13 +246,13 @@ export default function App() {
     setTimeout(() => setFlashRange(null), 1800)
   }
 
-  // 共现矩阵片段 → 切回正文并定位高亮
-  function handleLocateCoocSegment(seg) {
+  // 共现矩阵 / 说话人分析的片段 → 切回正文并定位高亮
+  function handleLocateSegment(seg) {
     setView('text')
     setPendingLocate({ start: seg.start, end: seg.end })
   }
 
-  // 正文渲染完成后处理来自共现视图的待定位片段
+  // 正文渲染完成后处理来自统计视图的待定位片段
   useEffect(() => {
     if (view !== 'text' || !pendingLocate) return
     const range = pendingLocate
@@ -361,6 +386,14 @@ export default function App() {
             >
               编码共现
             </button>
+            <button
+              role="tab"
+              aria-selected={view === 'speakers'}
+              className={view === 'speakers' ? 'active' : ''}
+              onClick={() => setView('speakers')}
+            >
+              说话人分析
+            </button>
           </div>
           {view === 'text' ? (
             <TextView
@@ -373,12 +406,19 @@ export default function App() {
                 if (editing) setEditing(null)
               }}
             />
-          ) : (
+          ) : view === 'cooccurrence' ? (
             <CooccurrenceView
               stats={coocStats}
               loading={coocLoading}
               error={coocError}
-              onLocateSegment={handleLocateCoocSegment}
+              onLocateSegment={handleLocateSegment}
+            />
+          ) : (
+            <SpeakerView
+              stats={speakerStats}
+              loading={speakerLoading}
+              error={speakerError}
+              onLocateSegment={handleLocateSegment}
             />
           )}
         </section>

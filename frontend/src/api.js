@@ -29,6 +29,7 @@ export const api = {
     const qs = codeIds && codeIds.length ? `?${codeIds.map((c) => `codes=${c}`).join('&')}` : ''
     return request(`/documents/${id}/cooccurrence${qs}`)
   },
+  getSpeakers: (id) => request(`/documents/${id}/speakers`),
 
   listCodes: () => request('/codes'),
   createCode: (name, color) =>
