@@ -20,6 +20,7 @@ from .conflicts import (
 )
 from .cooccurrence import build_code_intervals, intersect_intervals
 from .db import get_db, init_db, list_codings, next_color
+from .speakers import compute_speaker_stats
 
 Resolution = Literal["keep", "merge", "split"]
 
@@ -549,4 +550,55 @@ def cooccurrence(
         "document_id": document_id,
         "codes": [all_codes[cid] for cid in member_ids],
         "pairs": pairs,
+    }
+
+
+# ---------- 说话人分析 ----------
+
+@app.get("/api/documents/{document_id}/speakers")
+def speaker_analysis(
+    document_id: int,
+    codes: str | None = Query(default=None),
+) -> dict:
+    """按当前文档返回说话人分析数据。
+
+    解析形如「说话人：内容」的发言段落（行首标签 + 全角/半角冒号），统计
+    每位说话人的文本长度、各编码覆盖字符数与覆盖率；文首无法识别说话人
+    的文本归入「未标注说话人」。同一编码的重叠标注先合并再裁剪到发言段落，
+    共享字符不重复计数。
+
+    查询参数 `codes` 为逗号分隔的编码 id（?codes=1,2）：缺省统计编码本
+    全部编码；空串（?codes=）表示不统计任何编码，仅返回文本长度。
+    """
+    with get_db() as conn:
+        doc = get_document_or_404(conn, document_id)
+        all_codes = {
+            r["id"]: {"id": r["id"], "name": r["name"], "color": r["color"]}
+            for r in conn.execute("SELECT id, name, color FROM codes ORDER BY id")
+        }
+        if codes is None:
+            member_ids = sorted(all_codes)
+        else:
+            try:
+                member_ids = sorted(
+                    {int(x) for x in codes.split(",") if x.strip()}
+                )
+            except ValueError:
+                raise HTTPException(
+                    status_code=422,
+                    detail="codes 参数格式错误：应为逗号分隔的编码 id",
+                )
+            unknown = [cid for cid in member_ids if cid not in all_codes]
+            if unknown:
+                raise HTTPException(
+                    status_code=404, detail=f"编码不存在: {unknown}"
+                )
+        codings = list_codings(conn, document_id)
+
+    content = doc["content"]
+    return {
+        "document_id": document_id,
+        "document_length": len(content),
+        "codes": [all_codes[cid] for cid in member_ids],
+        "speakers": compute_speaker_stats(content, codings, member_ids),
     }

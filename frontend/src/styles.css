@@ -465,6 +465,169 @@ textarea:focus {
   white-space: nowrap;
 }
 
+/* ---------- 说话人分析视图 ---------- */
+
+.speaker-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.speaker-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.speaker-filter {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-size: 13px;
+}
+
+.speaker-filter .filter-label {
+  color: var(--muted);
+}
+
+.speaker-filter label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+}
+
+.speaker-filter label.dimmed {
+  opacity: 0.45;
+}
+
+.speaker-summary {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.speaker-table-wrap {
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.speaker-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
+  min-width: 100%;
+}
+
+.speaker-table th,
+.speaker-table td {
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 6px 10px;
+  white-space: nowrap;
+}
+
+.speaker-table tr > th:last-child,
+.speaker-table tr > td:last-child {
+  border-right: none;
+}
+
+.speaker-table thead th {
+  position: sticky;
+  top: 0;
+  background: #f8fafc;
+  z-index: 1;
+  text-align: left;
+  font-weight: 600;
+}
+
+.speaker-table thead .dot {
+  margin-right: 4px;
+}
+
+.speaker-table tbody th {
+  text-align: left;
+  background: #fcfcfd;
+}
+
+.speaker-table tfoot th,
+.speaker-table tfoot td {
+  background: #f8fafc;
+  font-weight: 600;
+  text-align: left;
+}
+
+.speaker-table td.num small {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.speaker-name {
+  border: none;
+  background: none;
+  padding: 0;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.speaker-name.unattributed {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.speaker-name:hover {
+  color: var(--accent);
+}
+
+.speaker-name.selected {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.stat-td {
+  padding: 2px !important;
+}
+
+.stat-cell {
+  display: block;
+  width: 100%;
+  border: none;
+  background: none;
+  padding: 4px 8px;
+  text-align: left;
+  border-radius: 4px;
+}
+
+.stat-cell strong {
+  font-weight: 600;
+}
+
+.stat-cell small {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.stat-cell:not(:disabled):hover {
+  background: #eff6ff;
+  color: var(--accent-dark);
+}
+
+.stat-cell.selected {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+  background: #eff6ff;
+}
+
+.stat-cell:disabled {
+  cursor: default;
+  color: #b6bcc7;
+}
+
 /* ---------- 右栏 ---------- */
 
 .right-panel {

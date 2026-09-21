@@ -29,6 +29,11 @@ export const api = {
     const qs = codeIds && codeIds.length ? `?${codeIds.map((c) => `codes=${c}`).join('&')}` : ''
     return request(`/documents/${id}/cooccurrence${qs}`)
   },
+  // codeIds：null=全部编码；[]=不统计编码（仅文本长度）；否则逗号分隔
+  getSpeakerStats: (id, codeIds = null) => {
+    if (codeIds === null) return request(`/documents/${id}/speakers`)
+    return request(`/documents/${id}/speakers?codes=${codeIds.join(',')}`)
+  },
 
   listCodes: () => request('/codes'),
   createCode: (name, color) =>
